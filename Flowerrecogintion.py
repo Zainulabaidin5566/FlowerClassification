@@ -11,7 +11,6 @@ from scipy.stats import skew
 training_data = []
 # Getting Training data-set
 def image_resize():
-    # add your path to flowers data
     path_to_folder = r'C:\Users\Danyal\Desktop\6th Semester\Digitial Image Processing\DIP Semester Project\Flowers dataset\flowers_data'
     categories = ["1", "2", "3", "4"]
     # Reading all classes of images
@@ -40,13 +39,13 @@ def HU_Moments(segmented):
     for i in range(0, 7):
         huMoments[i] = -1 * math.copysign(1.0, huMoments[i]) * math.log10(abs(huMoments[i]))
     return huMoments
-# Empty lists for GLCM outputs as features so that we can build our model
+# Empty lists for GLCM outputs
 contrast = []
 dissimiarity = []
 homogenity = []
 energy = []
 correlation = []
-# Function for finding GLCM of images as Features
+# Function for finding GLCM of images
 def GLCM(first_img):
     result = greycomatrix(first_img, [1], [0], levels=256, symmetric=False, normed=False)
     my_GLCM = result[:, :, 0, 0]
@@ -57,7 +56,7 @@ def GLCM(first_img):
     e = greycoprops(result, prop='energy')
     cr = greycoprops(result, prop='correlation')
     return c, d, h, e, cr
-# Assigning labels to different classes of images to do supervised learning
+# Assigning labels to different classes of images
 def Labels():
     label = []
     for x in range(120):
@@ -73,8 +72,9 @@ def Labels():
         else:
             # Label for type 4 flower images i.e bluebell
             label.append(3)
+
     return label
-# Function for getting color moments of images
+# Function for getting color moments of images as color features because these features are important for our model
 def color_moments(image):
     # Converting BGR images to HSV
     hsvimage = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
@@ -114,6 +114,7 @@ for i in training_data:
                    dt=0.5, init_level_set="checkerboard", extended_output=True)
     ch = ch + 1
     print(ch)
+
     segmented.append(cv[0])
 # New B, G and R planes for image
 B = np.zeros([300, 300])
@@ -215,7 +216,7 @@ for j in chanvesed:
                 BB[x][y] = 0
                 GG[x][y] = 0
                 RR[x][y] = 0
-    # Merging B, G and R planes to get single colored image
+    # Merging B, G and R planes to get single colored image and then we can extract best features
     final = cv2.merge((BB, GG, RR))
     final = final.astype(np.uint8)
     # Getting gray image
@@ -233,7 +234,7 @@ for j in chanvesed:
         (huMoments[0], huMoments[1], huMoments[2], huMoments[3], c, d, h, e, cr, m1, v1, s1, m2, v2, s2, m3, v3, s3))
 # distance list
 d = []
-# Flowers
+# Flower types
 Daffodil = 0
 Lotus = 0
 Daisy = 0
@@ -265,7 +266,7 @@ for p in list1:
         Daisy = Daisy + 1
     elif p[1] == 3:
         BlueBell = BlueBell + 1
-# Predicting results
+# Predicting results using model
 if Daffodil > Lotus and Daffodil > Daisy and Daffodil > BlueBell:
     predicted_list.append('Daffodil')
 elif Lotus > Daffodil and Lotus > Daisy and Lotus > BlueBell:
@@ -323,5 +324,5 @@ else:
 print('The Flower is a ', predicted_list)
 cv2.putText(showim, predicted_list[0], (10, 30), cv2.FONT_HERSHEY_SIMPLEX,
       1.0, (0, 0, 255), 3)
-cv2.imshow("Image", showim)
+cv2.imshow("Image_To_Anaylize", showim)
 cv2.waitKey(0)
