@@ -7,13 +7,11 @@ import math
 from skimage.feature import greycomatrix, greycoprops
 from scipy.spatial import distance
 from scipy.stats import skew
-
 # Creating empty list of training images
 training_data = []
-
-
 # Getting Training data-set
 def image_resize():
+    # add your path to flowers data
     path_to_folder = r'C:\Users\Danyal\Desktop\6th Semester\Digitial Image Processing\DIP Semester Project\Flowers dataset\flowers_data'
     categories = ["1", "2", "3", "4"]
     # Reading all classes of images
@@ -25,12 +23,8 @@ def image_resize():
             first_img = cv2.resize(first_img, (300, 300))
             training_data.append(first_img)
     return training_data
-
-
 # Empty List for test data
 t_data1 = []
-
-
 # Reading test images
 def test_image_resize():
     path_to_folder = r'C:\Users\Danyal\Desktop\6th Semester\Digitial Image Processing\DIP Semester Project\Flowers dataset\test_images'
@@ -39,8 +33,6 @@ def test_image_resize():
         first_img = cv2.resize(first_img, (300, 300))
         t_data1.append(first_img)
     return t_data1
-
-
 # Function for calculating Hu-moments
 def HU_Moments(segmented):
     moments = cv2.moments(segmented)
@@ -48,17 +40,13 @@ def HU_Moments(segmented):
     for i in range(0, 7):
         huMoments[i] = -1 * math.copysign(1.0, huMoments[i]) * math.log10(abs(huMoments[i]))
     return huMoments
-
-
-# Empty lists for GLCM outputs
+# Empty lists for GLCM outputs as features so that we can build our model
 contrast = []
 dissimiarity = []
 homogenity = []
 energy = []
 correlation = []
-
-
-# Function for finding GLCM of images
+# Function for finding GLCM of images as Features
 def GLCM(first_img):
     result = greycomatrix(first_img, [1], [0], levels=256, symmetric=False, normed=False)
     my_GLCM = result[:, :, 0, 0]
@@ -69,12 +57,8 @@ def GLCM(first_img):
     e = greycoprops(result, prop='energy')
     cr = greycoprops(result, prop='correlation')
     return c, d, h, e, cr
-
-
-# Assigning labels to different classes of images
+# Assigning labels to different classes of images to do supervised learning
 def Labels():
-
-
     label = []
     for x in range(120):
         if x < 30:
@@ -89,10 +73,7 @@ def Labels():
         else:
             # Label for type 4 flower images i.e bluebell
             label.append(3)
-
     return label
-
-
 # Function for getting color moments of images
 def color_moments(image):
     # Converting BGR images to HSV
@@ -110,8 +91,6 @@ def color_moments(image):
     Vvar = np.var(V)
     Vskewness = skew(V, None)
     return Hmean, Hvar, Hskewness, Smean, Svar, Sskewness, Vmean, Vvar, Vskewness
-
-
 # Creating empty lists for storing different features of images
 segmented = []
 Fmom = []
@@ -135,14 +114,11 @@ for i in training_data:
                    dt=0.5, init_level_set="checkerboard", extended_output=True)
     ch = ch + 1
     print(ch)
-
     segmented.append(cv[0])
-
 # New B, G and R planes for image
 B = np.zeros([300, 300])
 G = np.zeros([300, 300])
 R = np.zeros([300, 300])
-
 count = 0
 suck = 0
 for i in segmented:
@@ -186,7 +162,6 @@ for i in segmented:
             Tmom.append(huMoments[b])
         else:
             Fourmom.append(huMoments[b])
-
     # Getting contrast, dissimilarity etc. from GLCm function
     c, d, h, e, cr = GLCM(grayImage)
     # calling color moments function defined above
@@ -196,7 +171,6 @@ for i in segmented:
         (huMoments[0], huMoments[1], huMoments[2], huMoments[3], c, d, h, e, cr, m1, v1, s1, m2, v2, s2, m3, v3, s3))
 # Getting labels by calling Labels function
 label = Labels()
-
 # Chan-vesed List for test images
 chanvesed = []
 s = 0
@@ -241,7 +215,6 @@ for j in chanvesed:
                 BB[x][y] = 0
                 GG[x][y] = 0
                 RR[x][y] = 0
-
     # Merging B, G and R planes to get single colored image
     final = cv2.merge((BB, GG, RR))
     final = final.astype(np.uint8)
@@ -258,10 +231,8 @@ for j in chanvesed:
     # Storing test image features
     test.append(
         (huMoments[0], huMoments[1], huMoments[2], huMoments[3], c, d, h, e, cr, m1, v1, s1, m2, v2, s2, m3, v3, s3))
-
 # distance list
 d = []
-
 # Flowers
 Daffodil = 0
 Lotus = 0
@@ -269,7 +240,6 @@ Daisy = 0
 BlueBell = 0
 # Predictions list
 predicted_list = []
-
 c = test[0]
 l_count = 0
 # Finding euclidean distance and storing in distance list
@@ -295,7 +265,6 @@ for p in list1:
         Daisy = Daisy + 1
     elif p[1] == 3:
         BlueBell = BlueBell + 1
-
 # Predicting results
 if Daffodil > Lotus and Daffodil > Daisy and Daffodil > BlueBell:
     predicted_list.append('Daffodil')
